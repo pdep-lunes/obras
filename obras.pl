@@ -25,23 +25,6 @@ escribio(jorgeLuisBorges, elAleph).
 escribio(horacioQuiroga, cuentosDeLaSelva).
 escribio(horacioQuiroga, cuentosDeLocuraAmorYMuerte).
 
-
-% Si es cierto que alguien escribió determinada obra.
-% Quién/es escribieron una obra.
-% Qué obra/s escribió cierta persona.
-% Si es cierto que cierta persona escribió alguna obra, sin importar cuál.
-% Si es cierto que cierta obra existe.
-
-
-
-
-
-
-
-
-% Queremos agregar la información de cuáles de las obras son cómics. 
-%Por ejemplo, quiero preguntar si sandman es un cómic.
-
 esComic(sandman).
 esComic(cienBalas).
 esComic(watchmen).
@@ -49,17 +32,137 @@ esComic(planetary).
 esComic(elCaballeroOscuroRegresa).
 esComic(batmanAnioUno).
 
-
-% Queremos saber si alguien es artista del noveno arte: 
-% lo es cuando escribió algún cómic.
-
-/* esArtistaDelNovenoArte(neilGaiman).
-esArtistaDelNovenoArte(alanMoore). */
-
-% r <= p ^ q
 esArtistaDelNovenoArte(Artista):-
     escribio(Artista,Obra),
     esComic(Obra).
 
-  % Variable: libre.
-  % Variable: ligada o unificada.
+copiasVendidas(socorro, 100000).
+copiasVendidas(sandman, 200000).
+copiasVendidas(watchmen, 300000).
+copiasVendidas(cienBalas, 40000).
+copiasVendidas(planetary, 50000).
+copiasVendidas(elCaballeroOscuroRegresa, 60000).
+copiasVendidas(batmanAnioUno, 70000).
+copiasVendidas(americanGods, 80000).
+copiasVendidas(buenosPresagios, 90000).
+copiasVendidas(buenosPresagios, 10000).
+copiasVendidas(fundacion, 20000).
+copiasVendidas(yoRobot, 30000).
+copiasVendidas(elFinDeLaEternidad, 30000).
+copiasVendidas(laBusquedaDeLosElementos, 40000).
+copiasVendidas(martinFierro, 50000).
+copiasVendidas(it, 60000).
+copiasVendidas(misery, 70000).
+copiasVendidas(carrie, 80000).
+copiasVendidas(elJuegoDeGerald, 90000).
+copiasVendidas(rayuela, 10000).
+copiasVendidas(ficciones, 20000).
+copiasVendidas(elAleph, 30000).
+copiasVendidas(cuentosDeLaSelva, 40000).
+copiasVendidas(cuentosDeLocuraAmorYMuerte, 50000).
+
+esBestSeller(UnaObra) :-
+  copiasVendidas(UnaObra, CantidadVendida),
+  CantidadVendida > 50000.
+
+esBestSeller(UnaObra) :-
+  copiasVendidas(cuentosDeLaSelva, CantidadVendida),
+  copiasVendidas(UnaObra, CantidadVendida).
+
+esReincidente(Artista) :-
+  escribio(Artista, UnaObra),
+  escribio(Artista, OtraObra),
+  UnaObra \= OtraObra.
+
+convieneContratar(Artista) :-
+  esReincidente(Artista).
+
+convieneContratar(Artista) :-
+  escribio(Artista, UnaObra),
+  esBestSeller(UnaObra).
+
+leGustaA(gus, sandman).
+
+leGustaA(gus, UnaObra):-
+	escribio(isaacAsimov, UnaObra).
+
+esLibro(Obra) :-
+  escribio(_,Obra),
+  not(esComic(Obra)).
+
+nacionalidad(elsaBornemann, argentina).
+nacionalidad(jorgeLuisBorges, argentina).
+nacionalidad(joseHernandez, argentina).
+nacionalidad(julioCortazar, argentina).
+nacionalidad(horacioQuiroga, uruguay).
+
+esObraRioPlatense2(Obra):-
+  escribio(Artista, Obra),
+  esArtistaRioPlatense(Artista).
+
+esArtistaRioPlatense(Artista):-
+  nacionalidad(Artista, argentina).
+
+esArtistaRioPlatense(Artista):-
+  nacionalidad(Artista, uruguay).
+
+/*
+esObraRioPlatense3(Obra):-
+  escribio(Artista, Obra),
+  nacionalidad(Artista, Nacionalidad),
+  esNacionalidadRioPlatense(Nacionalidad).
+
+esNacionalidadRioPlatense(argentina).
+esNacionalidadRioPlatense(uruguay).
+*/
+
+%∀ x / P(x) -> Q(x)
+%forall(antecedente, consecuente)
+
+soloEscribioComics(Artista):-
+  escribio(Artista, _), %Generador. Hace que mi predicado sea inversible
+  forall(escribio(Artista, Obra), esComic(Obra)).
+
+%functores de tipo de libro
+%novela(Genero, CantidadDeCapitulos)
+%libroDeCuentos(CantidadDeCuentos)
+%cientifico(Disciplina)
+%bestSeller(Precio, CantidadDePaginas)
+
+%esDeTipo/2
+esDeTipo(it, novela(terror, 11)).
+esDeTipo(cuentosDeLaSelva, libroDeCuentos(10)).
+esDeTipo(elUniversoEnUnaTabla, cientifico(quimica)).
+esDeTipo(elUltimoTeoremaDeFermat, cientifico(matematica)).
+esDeTipo(yoRobot, bestSeller(700,253)).
+
+estaBueno(Libro):-
+  esDeTipo(Libro, Tipo),
+  esTipoCopado(Tipo).
+
+esTipoCopado(novela(terror, _)).
+
+esTipoCopado(novela(policial, Capitulos)):-
+    Capitulos < 12.
+
+esTipoCopado(libroDeCuentos(Cuentos)):-
+  Cuentos>10.
+
+esTipoCopado(cientifico(fisicaCuantica)).
+
+esTipoCopado(bestSeller(Precio,Paginas):-
+  Precio/Paginas < 50.
+
+cantidadDePaginas(Libro, Paginas):-
+  esDeTipo(Libro, Tipo),
+  paginasDeUnTipo(Tipo, Paginas).
+
+paginasDeUnTipo(cientifico(_), 1000).
+
+paginasDeUnTipo(bestSeller(_, Paginas), Paginas).
+
+paginasDeUnTipo(novela(_,CantidadCapitulos), Paginas):-
+  Paginas is CantidadCapitulos * 20.
+
+paginasDeUnTipo(libroDeCuentos(CantidadDeCuentos), Paginas):-
+  Paginas is CantidadDeCuentos * 5.
