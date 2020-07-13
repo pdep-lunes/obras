@@ -128,6 +128,7 @@ soloEscribioComics(Artista):-
 %libroDeCuentos(CantidadDeCuentos)
 %cientifico(Disciplina)
 %bestSeller(Precio, CantidadDePaginas)
+%fantastica(ElementosMágicos)
 
 %esDeTipo/2
 esDeTipo(it, novela(terror, 11)).
@@ -135,6 +136,7 @@ esDeTipo(cuentosDeLaSelva, libroDeCuentos(10)).
 esDeTipo(elUniversoEnUnaTabla, cientifico(quimica)).
 esDeTipo(elUltimoTeoremaDeFermat, cientifico(matematica)).
 esDeTipo(yoRobot, bestSeller(700,253)).
+esDeTipo(sandman, fantastica([yelmo, bolsaDeArena, rubi])).
 
 estaBueno(Libro):-
   esDeTipo(Libro, Tipo),
@@ -150,8 +152,11 @@ esTipoCopado(libroDeCuentos(Cuentos)):-
 
 esTipoCopado(cientifico(fisicaCuantica)).
 
-esTipoCopado(bestSeller(Precio,Paginas):-
+esTipoCopado(bestSeller(Precio,Paginas)):-
   Precio/Paginas < 50.
+
+esTipoCopado(fantastica(ElementosMagicos)):-
+	member(rubi, ElementosMagicos).
 
 cantidadDePaginas(Libro, Paginas):-
   esDeTipo(Libro, Tipo),
@@ -166,3 +171,31 @@ paginasDeUnTipo(novela(_,CantidadCapitulos), Paginas):-
 
 paginasDeUnTipo(libroDeCuentos(CantidadDeCuentos), Paginas):-
   Paginas is CantidadDeCuentos * 5.
+
+puntajeDeUnArtista(Puntaje, Artista):-
+	cantidadDeBestSellers(Artista, Cantidad),
+	Puntaje is Cantidad * 3.
+
+% Necesitamos hacer un findall el cual toma 3 parámetros: el formato, la condición y la lista
+cantidadDeBestSellers(Artista, Cantidad):-
+  bestSellersDeUnArtista(Artista, BestSellers),
+  length(BestSellers, Cantidad).
+
+bestSellersDeUnArtista(Artista, BestSellers):-
+  escribio(Artista, _),
+  findall(Obra, escribioBestSeller(Artista, Obra), BestSellers).
+
+escribioBestSeller(Artista, Obra):-
+	escribio(Artista, Obra),
+	esBestSeller(Obra).
+
+promedioDeCopiasVendidas(Artista, Promedio):-
+  escribio(Artista, _),
+	findall(CopiasVendidas, copiasDeArtista(Artista, CopiasVendidas), CopiasDeLasObras),
+	length(CopiasDeLasObras, CantidadDeObrasEscritas),
+  sum_list(CopiasDeLasObras, SumaTotalDeVentas),
+	Promedio is SumaTotalDeVentas / CantidadDeObrasEscritas.
+
+copiasDeArtista(Artista, CopiasVendidas):-
+	escribio(Artista, Obra),
+	copiasVendidas(Obra, CopiasVendidas).
